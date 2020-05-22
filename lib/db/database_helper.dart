@@ -31,5 +31,10 @@ class DatabaseHelper {
         "name TEXT NOT NULL, "
         "dob INTEGER NOT NULL, "
         "designation TEXT NOT NULL)");
+
+    await db.execute("CREATE TABLE Designation("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "display TEXT NOT NULL, "
+        "value TEXT NOT NULL)");
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './screens/designation_screen.dart';
 import './screens/add_edit_employeeScreen.dart';
 import './screens/home_page.dart';
 
@@ -18,6 +19,7 @@ class MyApp extends StatelessWidget {
       routes: {
         HomePage.id: (_) => HomePage(),
         EditEmployeeScreen.id: (_) => EditEmployeeScreen(),
+        DesignationScreen.id: (_) => DesignationScreen(),
       },
     );
   }

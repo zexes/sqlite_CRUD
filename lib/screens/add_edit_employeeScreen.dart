@@ -2,6 +2,9 @@ import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:sqlite/model/Designation.dart';
+import '../provider/designation_provider.dart';
 import '../screens/home_page.dart';
 import '../provider/employee_provider.dart';
 import '../model/employee.dart';
@@ -29,7 +32,6 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
   final _form = GlobalKey<FormState>();
   Employee _editedEmployee = Employee('', 0, '');
   int employeeId = 0;
-
   var _isInit = true;
 
   @override
@@ -91,109 +93,120 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text((employeeId > 0) ? 'Edit' : 'Add new Employee'),
-      content: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _form,
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  TextFormField(
-                    controller:
-                        _nameController, //either initial value or controller noth both
-                    decoration: InputDecoration(labelText: 'name'),
-                    textInputAction: TextInputAction.next,
-                    onFieldSubmitted: (_) {
-                      FocusScope.of(context).requestFocus(_dobFocusNode);
-                    },
-                    validator: (value) {
-                      return (value.isEmpty) ? 'Please provide a value' : null;
-                    },
-                    onSaved: (value) {
-                      _editedEmployee = Employee(
-                        value,
-                        _editedEmployee.dob,
-                        _editedEmployee.designation,
-                      );
-                    },
-                  ),
-                  DropDownFormField(
-                    titleText: 'Designation',
-                    hintText: 'Please choose one',
-                    value: _myActivity,
-                    onSaved: (value) {
-                      final onEdit = _myActivity;
-                      if (employeeId > 0) {
-                        _myActivity = onEdit;
-                      } else {
-                        setState(() {
-                          _myActivity = value;
-                        });
-                      }
-                      _editedEmployee = Employee(
-                        _editedEmployee.name,
-                        _editedEmployee.dob,
-                        _myActivity,
-                      );
-                    },
-                    validator: (value) {
-                      return (_myActivity == null)
-                          ? 'Please provide a value'
-                          : null;
-                    },
-                    onChanged: (value) {
-                      setState(() {
-                        _myActivity = value;
-                      });
-                    },
-                    dataSource: data,
-                    textField: 'display',
-                    valueField: 'value',
-                  ),
-                  InkWell(
-                    onTap: _presentDatePicker,
-                    child: IgnorePointer(
-                      child: TextFormField(
-                        controller: _dobController,
-                        decoration: InputDecoration(labelText: 'dob'),
-                        textInputAction: TextInputAction.done,
-                        focusNode: _dobFocusNode,
-                        onFieldSubmitted: (_) => _saveForm(),
+    return FutureProvider<List<Designation>>(
+        initialData: [],
+        create: (context) => DesignationProvider().getDesignations(),
+        child: AlertDialog(
+          title: Text((employeeId > 0) ? 'Edit' : 'Add new Employee'),
+          content: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _form,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      TextFormField(
+                        controller:
+                            _nameController, //either initial value or controller noth both
+                        decoration: InputDecoration(labelText: 'name'),
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (_) {
+                          FocusScope.of(context).requestFocus(_dobFocusNode);
+                        },
                         validator: (value) {
-                          if (value.isEmpty) {
-                            return 'Please enter a valid Date.';
-                          }
-                          return null;
+                          return (value.isEmpty)
+                              ? 'Please provide a value'
+                              : null;
                         },
                         onSaved: (value) {
+                          setState(() {});
                           _editedEmployee = Employee(
-                            _editedEmployee.name,
-                            _selectedDate.millisecondsSinceEpoch,
+                            value,
+                            _editedEmployee.dob,
                             _editedEmployee.designation,
                           );
                         },
                       ),
-                    ),
+                      Consumer<List<Designation>>(
+                          builder: (_, designations, __) {
+                        final newData = [];
+                        designations.forEach((element) {
+                          newData.add(element.toMap());
+                        });
+                        return DropDownFormField(
+                          titleText: 'Designation',
+                          hintText: 'Please choose one',
+                          value: _myActivity,
+                          onSaved: (value) {
+                            final onEdit = _myActivity;
+                            if (employeeId > 0) {
+                              _myActivity = onEdit;
+                            } else {
+                              _myActivity = value;
+                            }
+                            _editedEmployee = Employee(
+                              _editedEmployee.name,
+                              _editedEmployee.dob,
+                              _myActivity,
+                            );
+                          },
+                          validator: (value) {
+                            return (_myActivity == null)
+                                ? 'Please provide a value'
+                                : null;
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              _myActivity = value;
+                            });
+                          },
+                          dataSource: newData,
+                          textField: 'display',
+                          valueField: 'value',
+                        );
+                      }),
+                      InkWell(
+                        onTap: _presentDatePicker,
+                        child: IgnorePointer(
+                          child: TextFormField(
+                            controller: _dobController,
+                            decoration: InputDecoration(labelText: 'dob'),
+                            textInputAction: TextInputAction.done,
+                            focusNode: _dobFocusNode,
+                            onFieldSubmitted: (_) => _saveForm(),
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Please enter a valid Date.';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              _editedEmployee = Employee(
+                                _editedEmployee.name,
+                                _selectedDate.millisecondsSinceEpoch,
+                                _editedEmployee.designation,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => _saveForm(), //_saveForm
+                        child: new Container(
+                          margin: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
+                          child: getAppBorderButton(
+                              (employeeId > 0) ? "Edit" : "Add",
+                              EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0)),
+                        ),
+                      ),
+                    ],
                   ),
-                  GestureDetector(
-                    onTap: () => _saveForm(), //_saveForm
-                    child: new Container(
-                      margin: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
-                      child: getAppBorderButton(
-                          (employeeId > 0) ? "Edit" : "Add",
-                          EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0)),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   Widget getAppBorderButton(String buttonLabel, EdgeInsets margin) {
@@ -231,23 +244,4 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
     var db = EmployeeProvider();
     return await db.getSingleEmployee(id);
   }
-
-  final data = [
-    {
-      "display": "Doctor",
-      "value": "Doctor",
-    },
-    {
-      "display": "Nurse",
-      "value": "Nurse",
-    },
-    {
-      "display": "Technician",
-      "value": "Technician",
-    },
-    {
-      "display": "Baby Doctor",
-      "value": "Baby Doctor",
-    },
-  ];
 }

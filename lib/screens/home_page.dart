@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../widget/app_drawer.dart';
+import '../screens/designation_screen.dart';
 import '../model/employee.dart';
 import '../provider/employee_provider.dart';
 import '../widget/employee_item.dart';
 import './add_edit_employeeScreen.dart';
+
+enum Options { Add, Designation }
 
 class HomePage extends StatelessWidget {
   static const String id = 'home_page';
@@ -17,17 +21,25 @@ class HomePage extends StatelessWidget {
         appBar: AppBar(
           title: Text('GloboMedRef'),
           actions: <Widget>[
-            IconButton(
-              icon: const Icon(
-                Icons.group_add,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext ctx) => EditEmployeeScreen());
+            PopupMenuButton(
+              icon: Icon(Icons.more_vert),
+              onSelected: (Options selectedValue) {
+                if (selectedValue == Options.Add) {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext ctx) => EditEmployeeScreen());
+                } else {
+                  Navigator.of(context)
+                      .pushReplacementNamed(DesignationScreen.id);
+                }
               },
-            ),
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  child: Text('Add Employee'),
+                  value: Options.Add,
+                )
+              ],
+            )
           ],
         ),
         body: Consumer<List<Employee>>(
@@ -44,6 +56,7 @@ class HomePage extends StatelessWidget {
             );
           },
         ),
+        drawer: AppDrawer(),
         floatingActionButton: FloatingActionButton(
           elevation: 5.0,
           onPressed: () => showDialog(
