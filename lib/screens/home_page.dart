@@ -70,11 +70,11 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-      onWillPop: () => _onWillPop(context),
+      onWillPop: () => onWillPop(context),
     );
   }
 
-  Future<bool> _onWillPop(BuildContext context) {
+  Future<bool> onWillPop(BuildContext context) {
     return showDialog(
           context: context,
           builder: (context) => new AlertDialog(
