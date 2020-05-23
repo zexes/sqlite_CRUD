@@ -1,13 +1,8 @@
-import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart';
 import 'package:sqlite/model/Designation.dart';
 import 'package:sqlite/provider/designation_provider.dart';
 import 'package:sqlite/screens/designation_screen.dart';
-import '../screens/home_page.dart';
-import '../provider/employee_provider.dart';
-import '../model/employee.dart';
 
 class EditDesignationScreen extends StatefulWidget {
   final int chosenDesignationId;
@@ -79,6 +74,7 @@ class _EditDesignationScreenState extends State<EditDesignationScreen> {
                       return (value.isEmpty) ? 'Please provide a value' : null;
                     },
                     onSaved: (value) {
+                      setState(() {});
                       _editedDesignation = Designation(value, value);
                     },
                   ),

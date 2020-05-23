@@ -22,7 +22,7 @@ class DesignationProvider with ChangeNotifier {
       final designationIndex = designationFromDb[i];
       Designation designation = Designation(
         designationIndex["display"],
-        designationIndex["display_value"],
+        designationIndex["value"],
       );
       designation.setUserId(designationIndex["id"]);
       designations.add(designation);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sqlite/screens/add_edit_designationScreen.dart';
+import '../screens/add_edit_designationScreen.dart';
 import '../provider/designation_provider.dart';
 import '../widget/designation_item.dart';
 import '../model/Designation.dart';
@@ -29,16 +29,16 @@ class DesignationScreen extends StatelessWidget {
           ],
         ),
         body: Consumer<List<Designation>>(
-          builder: (_, designation, __) {
+          builder: (_, designations, __) {
             return ListView.builder(
               itemBuilder: (context, index) {
-                final designationIndex = designation[index];
+                final designationIndex = designations[index];
                 return DesignationItem(
                     id: designationIndex.id,
                     display: designationIndex.display,
-                    displayValue: designationIndex.value);
+                    value: designationIndex.value);
               },
-              itemCount: designation.length,
+              itemCount: designations.length,
             );
           },
         ),

@@ -2,17 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:sqlite/model/Designation.dart';
 import 'package:sqlite/provider/designation_provider.dart';
 import 'package:sqlite/screens/designation_screen.dart';
-import '../model/employee.dart';
-import '../provider/employee_provider.dart';
 import '../screens/add_edit_employeeScreen.dart';
-import '../screens/home_page.dart';
 
 class DesignationItem extends StatelessWidget {
   final int id;
   final String display;
-  final String displayValue;
+  final String value;
 
-  const DesignationItem({this.id, this.display, this.displayValue});
+  const DesignationItem({this.id, this.display, this.value});
 
   Future<void> deleteDesignation() async {
     var db = DesignationProvider();
@@ -54,7 +51,7 @@ class DesignationItem extends StatelessWidget {
                 fontFamily: 'Jost',
                 fontSize: 20.0,
               )),
-          subtitle: Text(displayValue,
+          subtitle: Text(value,
               style: TextStyle(
                   fontFamily: 'Jost',
                   fontSize: 18.0,
