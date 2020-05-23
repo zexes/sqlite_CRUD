@@ -3,6 +3,7 @@ import '../screens/designation_screen.dart';
 import '../screens/home_page.dart';
 
 class AppDrawer extends StatelessWidget {
+  static const String id = 'app_drawer';
   @override
   Widget build(BuildContext context) {
     return Drawer(
