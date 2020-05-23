@@ -15,73 +15,71 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final numberAdded = ModalRoute.of(context).settings.arguments as int;
-    print('number added $numberAdded');
     return WillPopScope(
-      child: ChangeNotifierProvider<EmployeeProvider>(
-        create: (context) => EmployeeProvider(),
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text('GloboMedRef'),
-            actions: <Widget>[
-              PopupMenuButton(
-                icon: Icon(Icons.more_vert),
-                onSelected: (Options selectedValue) async {
-                  bool result;
-                  if (selectedValue == Options.Add) {
-                    result = await showDialog<bool>(
-                        context: context,
-                        builder: (BuildContext ctx) => EditEmployeeScreen());
-                  } else {
-                    Navigator.of(context)
-                        .pushReplacementNamed(DesignationScreen.id);
-                  }
-                },
-                itemBuilder: (_) => [
-                  PopupMenuItem(
-                    child: Text('Add Employee'),
-                    value: Options.Add,
-                  ),
-                  PopupMenuItem(
-                    child: Text('Designation Screen'),
-                    value: Options.Designation,
-                  )
-                ],
-              )
-            ],
-          ),
-          body: Consumer<EmployeeProvider>(
-            builder: (_, empProvider, __) {
-              return FutureBuilder<List<Employee>>(
-                future: empProvider.getEmployees(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return CircularProgressIndicator();
-                  }
-                  return ListView.builder(
-                    itemBuilder: (context, index) {
-                      final employeeIndex = snapshot.data[index];
-                      return EmployeeItem(
-                          id: employeeIndex.id,
-                          name: employeeIndex.name,
-                          designation: employeeIndex.designation);
-                    },
-                    itemCount: snapshot.data.length,
-                  );
-                },
-              );
-            },
-          ),
-          drawer: AppDrawer(),
-          floatingActionButton: FloatingActionButton(
-            elevation: 5.0,
-            onPressed: () => showDialog(
-                context: context,
-                builder: (BuildContext ctx) => EditEmployeeScreen()),
-            child: Icon(Icons.add),
-            backgroundColor: Theme.of(context).primaryColor,
-            splashColor: Theme.of(context).accentColor,
-          ),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('GloboMedRef'),
+          actions: <Widget>[
+            PopupMenuButton(
+              icon: Icon(Icons.more_vert),
+              onSelected: (Options selectedValue) async {
+                bool result;
+                if (selectedValue == Options.Add) {
+                  result = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext ctx) => EditEmployeeScreen());
+                } else {
+                  Navigator.of(context)
+                      .pushReplacementNamed(DesignationScreen.id);
+                }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  child: Text('Add Employee'),
+                  value: Options.Add,
+                ),
+                PopupMenuItem(
+                  child: Text('Designation Screen'),
+                  value: Options.Designation,
+                )
+              ],
+            )
+          ],
+        ),
+        body: Consumer<EmployeeProvider>(
+          builder: (_, empProvider, __) {
+            return FutureBuilder<List<Employee>>(
+              future: empProvider.getEmployees(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(
+                      child: CircularProgressIndicator(
+                    backgroundColor: Theme.of(context).primaryColorDark,
+                  ));
+                }
+                return ListView.builder(
+                  itemBuilder: (context, index) {
+                    final employeeIndex = snapshot.data[index];
+                    return EmployeeItem(
+                        id: employeeIndex.id,
+                        name: employeeIndex.name,
+                        designation: employeeIndex.designation);
+                  },
+                  itemCount: snapshot.data.length,
+                );
+              },
+            );
+          },
+        ),
+        drawer: AppDrawer(),
+        floatingActionButton: FloatingActionButton(
+          elevation: 5.0,
+          onPressed: () => showDialog(
+              context: context,
+              builder: (BuildContext ctx) => EditEmployeeScreen()),
+          child: Icon(Icons.add),
+          backgroundColor: Theme.of(context).primaryColor,
+          splashColor: Theme.of(context).accentColor,
         ),
       ),
       onWillPop: () => onWillPop(context),
