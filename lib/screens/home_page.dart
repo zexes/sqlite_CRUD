@@ -15,19 +15,21 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final numberAdded = ModalRoute.of(context).settings.arguments as int;
+    print('number added $numberAdded');
     return WillPopScope(
-      child: FutureProvider<List<Employee>>(
-        initialData: [],
-        create: (context) => EmployeeProvider().getEmployees(),
+      child: ChangeNotifierProvider<EmployeeProvider>(
+        create: (context) => EmployeeProvider(),
         child: Scaffold(
           appBar: AppBar(
             title: Text('GloboMedRef'),
             actions: <Widget>[
               PopupMenuButton(
                 icon: Icon(Icons.more_vert),
-                onSelected: (Options selectedValue) {
+                onSelected: (Options selectedValue) async {
+                  bool result;
                   if (selectedValue == Options.Add) {
-                    showDialog(
+                    result = await showDialog<bool>(
                         context: context,
                         builder: (BuildContext ctx) => EditEmployeeScreen());
                   } else {
@@ -39,22 +41,34 @@ class HomePage extends StatelessWidget {
                   PopupMenuItem(
                     child: Text('Add Employee'),
                     value: Options.Add,
+                  ),
+                  PopupMenuItem(
+                    child: Text('Designation Screen'),
+                    value: Options.Designation,
                   )
                 ],
               )
             ],
           ),
-          body: Consumer<List<Employee>>(
-            builder: (_, employees, __) {
-              return ListView.builder(
-                itemBuilder: (context, index) {
-                  final employeeIndex = employees[index];
-                  return EmployeeItem(
-                      id: employeeIndex.id,
-                      name: employeeIndex.name,
-                      designation: employeeIndex.designation);
+          body: Consumer<EmployeeProvider>(
+            builder: (_, empProvider, __) {
+              return FutureBuilder<List<Employee>>(
+                future: empProvider.getEmployees(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return CircularProgressIndicator();
+                  }
+                  return ListView.builder(
+                    itemBuilder: (context, index) {
+                      final employeeIndex = snapshot.data[index];
+                      return EmployeeItem(
+                          id: employeeIndex.id,
+                          name: employeeIndex.name,
+                          designation: employeeIndex.designation);
+                    },
+                    itemCount: snapshot.data.length,
+                  );
                 },
-                itemCount: employees.length,
               );
             },
           ),

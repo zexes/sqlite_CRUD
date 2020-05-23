@@ -70,7 +70,6 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
     _form.currentState
         .save(); //updated _editedProduct above when save is called in the fields below
     addRecord();
-    Navigator.of(context).pushReplacementNamed(HomePage.id);
   }
 
   // remember context used here is the State_FUL context
@@ -192,7 +191,11 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () => _saveForm(), //_saveForm
+                        onTap: () {
+                          _saveForm();
+                          Navigator.of(context)
+                              .pushReplacementNamed(HomePage.id);
+                        }, //_saveForm
                         child: new Container(
                           margin: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
                           child: getAppBorderButton(

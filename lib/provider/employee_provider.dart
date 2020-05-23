@@ -6,11 +6,11 @@ import '../model/employee.dart';
 class EmployeeProvider with ChangeNotifier {
   Future<Database> database = DatabaseHelper().database;
 
-  Future<int> saveEmployee(Employee employee) async {
+  Future<void> saveEmployee(Employee employee) async {
     Database db = await database;
     int res = await db.insert("Employee", employee.toMap());
     print('saved new employee');
-    return res;
+    notifyListeners();
   }
 
   Future<List<Employee>> getEmployees() async {
@@ -34,19 +34,19 @@ class EmployeeProvider with ChangeNotifier {
     return employee;
   }
 
-  Future<int> deleteEmployee(Employee employee) async {
+  Future<void> deleteEmployee(Employee employee) async {
     Database db = await database;
 
     int res =
         await db.rawDelete('DELETE FROM Employee WHERE id = ?', [employee.id]);
-    return res;
+    notifyListeners();
   }
 
-  Future<int> update(Employee employee) async {
+  Future<void> update(Employee employee) async {
     Database db = await database;
     int res = await db.update("Employee", employee.toMap(),
         where: "id = ?", whereArgs: <int>[employee.id]);
     print('updated new employee');
-    return res;
+    notifyListeners();
   }
 }
