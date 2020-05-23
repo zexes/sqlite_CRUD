@@ -1,6 +1,7 @@
 # sqlite
 
-A new Flutter application.
+A simple flutter application that uses sqlite and performs all CRUD FUNCTIONALITY
+Link to app: 
 
 ## Getting Started
 
