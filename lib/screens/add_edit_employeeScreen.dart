@@ -173,7 +173,7 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
                             decoration: InputDecoration(labelText: 'dob'),
                             textInputAction: TextInputAction.done,
                             focusNode: _dobFocusNode,
-                            onFieldSubmitted: (_) => _saveForm(),
+                            onFieldSubmitted: (_) => _saveForm,
                             validator: (value) {
                               if (value.isEmpty) {
                                 return 'Please enter a valid Date.';

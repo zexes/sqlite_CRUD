@@ -23,11 +23,8 @@ class HomePage extends StatelessWidget {
             PopupMenuButton(
               icon: Icon(Icons.more_vert),
               onSelected: (Options selectedValue) async {
-                bool result;
                 if (selectedValue == Options.Add) {
-                  result = await showDialog<bool>(
-                      context: context,
-                      builder: (BuildContext ctx) => EditEmployeeScreen());
+                  _showDialog(context);
                 } else {
                   Navigator.of(context)
                       .pushReplacementNamed(DesignationScreen.id);
@@ -74,9 +71,7 @@ class HomePage extends StatelessWidget {
         drawer: AppDrawer(),
         floatingActionButton: FloatingActionButton(
           elevation: 5.0,
-          onPressed: () => showDialog(
-              context: context,
-              builder: (BuildContext ctx) => EditEmployeeScreen()),
+          onPressed: () => _showDialog,
           child: Icon(Icons.add),
           backgroundColor: Theme.of(context).primaryColor,
           splashColor: Theme.of(context).accentColor,
@@ -84,6 +79,16 @@ class HomePage extends StatelessWidget {
       ),
       onWillPop: () => onWillPop(context),
     );
+  }
+
+  Future<void> _showDialog(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) => EditEmployeeScreen()).then((value) {
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text('new on $value'),
+      ));
+    });
   }
 
   Future<bool> onWillPop(BuildContext context) {

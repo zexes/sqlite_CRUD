@@ -42,7 +42,7 @@ class _EditDesignationScreenState extends State<EditDesignationScreen> {
     super.dispose();
   }
 
-  void _saveForm() async {
+  void _saveForm() {
     final isValid = _form.currentState.validate();
     if (!isValid) {
       return;
