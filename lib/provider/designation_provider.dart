@@ -1,34 +1,50 @@
+import 'dart:collection';
+
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqlite_api.dart';
+import 'package:sqlite/model/custom_exception.dart';
 import '../model/Designation.dart';
 import '../db/database_helper.dart';
 
 class DesignationProvider with ChangeNotifier {
   Future<Database> database = DatabaseHelper().database;
 
-  Future<int> saveDesignation(Designation designation) async {
-    Database db = await database;
-    int res = await db.insert("Designation", designation.toMap());
-    print('saved new designation');
-    return res;
+  List<Designation> _designationList = [];
+
+  List<Designation> get designations {
+    print(_designationList.toString());
+    return UnmodifiableListView(_designationList);
   }
 
-  Future<List<Designation>> getDesignations() async {
+  Future<void> saveDesignation(Designation designation) async {
+    Database db = await database;
+//    int index = _designationList
+//        .indexWhere((element) => element.value == designation.value);
+//    print('caught you $index');
+//    if (index > 0) {
+//      throw CustomException('Designation Already Exist');
+//    }
+    int res = await db.insert("Designation", designation.toMap());
+    _designationList.add(designation);
+    print('saved new designation');
+    notifyListeners();
+  }
+
+  Future<void> getDesignations() async {
     Database db = await database;
     List<Map> designationFromDb =
         await db.rawQuery('SELECT * FROM Designation');
     List<Designation> designations = [];
     for (int i = 0; i < designationFromDb.length; i++) {
       final designationIndex = designationFromDb[i];
-      Designation designation = Designation(
-        designationIndex["display"],
-        designationIndex["value"],
-      );
-      designation.setUserId(designationIndex["id"]);
+      Designation designation =
+          Designation(designationIndex["display"], designationIndex["value"]);
+      designation.setDesignationId(designationIndex["id"]);
       designations.add(designation);
     }
+    _designationList = designations;
     print('database length: , ${designations.length}');
-    return designations;
+    notifyListeners();
   }
 
   Future<List<Map<String, String>>> getDesignationsMap() async {
@@ -40,7 +56,7 @@ class DesignationProvider with ChangeNotifier {
       final designationIndex = designationFromDb[i];
       Map<String, String> map = {};
       map['display'] = designationIndex["display"];
-      map['value'] = designationIndex["display_value"];
+      map['value'] = designationIndex["value"];
       listMap.add(map);
     }
     print('database length: , $listMap');
@@ -49,24 +65,30 @@ class DesignationProvider with ChangeNotifier {
   }
 
   Future<Designation> getSingleDesignation(int id) async {
-    List<Designation> designations = await getDesignations();
+    List<Designation> designations = _designationList;
     Designation designation = designations.firstWhere((des) => des.id == id);
     return designation;
   }
 
-  Future<int> deleteDesignation(Designation designation) async {
+  Future<void> deleteDesignation(int id) async {
     Database db = await database;
 
-    int res = await db
-        .rawDelete('DELETE FROM Designation WHERE id = ?', [designation.id]);
-    return res;
+    int res = await db.rawDelete('DELETE FROM Designation WHERE id = ?', [id]);
+    int employeeIndex =
+        _designationList.indexWhere((element) => element.id == id);
+    _designationList.removeAt(employeeIndex);
+    notifyListeners();
   }
 
-  Future<int> update(Designation designation) async {
+  Future<void> update(Designation designation) async {
     Database db = await database;
+    int index =
+        _designationList.indexWhere((element) => element.id == designation.id);
+    _designationList.removeWhere((element) => element.id == designation.id);
     int res = await db.update("Designation", designation.toMap(),
         where: "id = ?", whereArgs: <int>[designation.id]);
     print('updated new Designation');
-    return res;
+    _designationList.insert(index, designation);
+    notifyListeners();
   }
 }

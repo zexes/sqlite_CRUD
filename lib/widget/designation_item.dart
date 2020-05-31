@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:sqlite/model/Designation.dart';
-import 'package:sqlite/provider/designation_provider.dart';
-import 'package:sqlite/screens/designation_screen.dart';
-import '../screens/add_edit_employeeScreen.dart';
+import 'package:provider/provider.dart';
+import '../provider/designation_provider.dart';
+import '../screens/add_edit_designationScreen.dart';
+import '../screens/designation_screen.dart';
 
 class DesignationItem extends StatelessWidget {
   final int id;
@@ -11,15 +11,10 @@ class DesignationItem extends StatelessWidget {
 
   const DesignationItem({this.id, this.display, this.value});
 
-  Future<void> deleteDesignation() async {
-    var db = DesignationProvider();
-    Designation designation = await db.getSingleDesignation(id);
-    await db.deleteDesignation(designation);
-  }
-
-  Future<void> editDesignation(Designation designation) async {
-    var db = DesignationProvider();
-    db.update(designation);
+  Future<void> deleteDesignation(BuildContext context) async {
+    final designationProvider =
+        Provider.of<DesignationProvider>(context, listen: false);
+    await designationProvider.deleteDesignation(id);
   }
 
   @override
@@ -65,8 +60,8 @@ class DesignationItem extends StatelessWidget {
                   onPressed: () {
                     showDialog(
                       context: context,
-                      builder: (BuildContext ctx) => EditEmployeeScreen(
-                        chosenEmployeeId: id,
+                      builder: (BuildContext ctx) => EditDesignationScreen(
+                        chosenDesignationId: id,
                       ),
                     );
                   },
@@ -103,7 +98,7 @@ class DesignationItem extends StatelessWidget {
           FlatButton(
             child: Text('Yes'),
             onPressed: () async {
-              await deleteDesignation();
+              await deleteDesignation(context);
               Navigator.of(context).pushReplacementNamed(DesignationScreen.id);
             },
           )

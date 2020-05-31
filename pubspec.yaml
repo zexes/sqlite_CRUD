@@ -33,6 +33,7 @@ dependencies:
   provider: ^4.1.2
   intl: ^0.16.1
   dropdown_formfield: ^0.1.2
+  flushbar: ^1.10.4
 
 dev_dependencies:
   flutter_test:

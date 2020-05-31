@@ -1,4 +1,6 @@
-class Employee {
+import 'package:flutter/cupertino.dart';
+
+class Employee with ChangeNotifier {
   int id;
   String _name; // since i did not declare as final
   int _dob;
@@ -28,7 +30,7 @@ class Employee {
 //    map["designation"] = _designation;
 //    return map;}
 
-  void setUserId(int id) {
+  void setEmployeeId(int id) {
     this.id = id;
   }
 }

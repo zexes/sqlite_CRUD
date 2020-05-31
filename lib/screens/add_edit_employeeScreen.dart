@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:sqlite/model/Designation.dart';
 import '../provider/designation_provider.dart';
-import '../screens/home_page.dart';
 import '../provider/employee_provider.dart';
 import '../model/employee.dart';
 
@@ -36,10 +34,14 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
 
   @override
   void didChangeDependencies() async {
+    print('edit id ${widget.chosenEmployeeId}');
     if (_isInit) {
       if (widget.chosenEmployeeId != null) {
         employeeId = widget.chosenEmployeeId;
-        _editedEmployee = await getEmployee(employeeId);
+        _editedEmployee =
+            await Provider.of<EmployeeProvider>(context, listen: false)
+                .getSingleEmployee(employeeId);
+        print('name= ${_editedEmployee.name} id: ${_editedEmployee.id}');
         _nameController.text = _editedEmployee.name;
         setState(() {
           _myActivity = _editedEmployee.designation;
@@ -69,7 +71,9 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
     }
     _form.currentState
         .save(); //updated _editedProduct above when save is called in the fields below
-    addRecord();
+    setState(() {
+      addRecord();
+    });
   }
 
   // remember context used here is the State_FUL context
@@ -92,124 +96,118 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureProvider<List<Designation>>(
-        initialData: [],
-        create: (context) => DesignationProvider().getDesignations(),
-        child: AlertDialog(
-          title: Text((employeeId > 0) ? 'Edit' : 'Add new Employee'),
-          content: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _form,
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: <Widget>[
-                      TextFormField(
-                        controller:
-                            _nameController, //either initial value or controller noth both
-                        decoration: InputDecoration(labelText: 'name'),
-                        textInputAction: TextInputAction.next,
-                        onFieldSubmitted: (_) {
-                          FocusScope.of(context).requestFocus(_dobFocusNode);
-                        },
+    return AlertDialog(
+      title: Text((employeeId > 0) ? 'Edit' : 'Add new Employee'),
+      content: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _form,
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  TextFormField(
+                    controller:
+                        _nameController, //either initial value or controller noth both
+                    decoration: InputDecoration(labelText: 'name'),
+                    textInputAction: TextInputAction.next,
+                    onFieldSubmitted: (_) {
+                      FocusScope.of(context).requestFocus(_dobFocusNode);
+                    },
+                    validator: (value) {
+                      return (value.isEmpty) ? 'Please provide a value' : null;
+                    },
+                    onSaved: (value) {
+                      setState(() {});
+                      _editedEmployee = Employee(
+                        value,
+                        _editedEmployee.dob,
+                        _editedEmployee.designation,
+                      );
+                    },
+                  ),
+                  Consumer<DesignationProvider>(
+                      builder: (_, designationData, __) {
+                    final newData = [];
+                    designationData.designations.forEach((element) {
+                      newData.add(element.toMap());
+                    });
+                    return DropDownFormField(
+                      titleText: 'Designation',
+                      hintText: 'Please choose one',
+                      value: _myActivity,
+                      onSaved: (value) {
+                        final onEdit = _myActivity;
+                        if (employeeId > 0) {
+                          _myActivity = onEdit;
+                        } else {
+                          _myActivity = value;
+                        }
+                        _editedEmployee = Employee(
+                          _editedEmployee.name,
+                          _editedEmployee.dob,
+                          _myActivity,
+                        );
+                      },
+                      validator: (value) {
+                        return (_myActivity == null)
+                            ? 'Please provide a value'
+                            : null;
+                      },
+                      onChanged: (value) {
+                        setState(() {
+                          _myActivity = value;
+                        });
+                      },
+                      dataSource: newData,
+                      textField: 'display',
+                      valueField: 'value',
+                    );
+                  }),
+                  InkWell(
+                    onTap: _presentDatePicker,
+                    child: IgnorePointer(
+                      child: TextFormField(
+                        controller: _dobController,
+                        decoration: InputDecoration(labelText: 'dob'),
+                        textInputAction: TextInputAction.done,
+                        focusNode: _dobFocusNode,
+                        onFieldSubmitted: (_) => _saveForm,
                         validator: (value) {
-                          return (value.isEmpty)
-                              ? 'Please provide a value'
-                              : null;
+                          if (value.isEmpty) {
+                            return 'Please enter a valid Date.';
+                          }
+                          return null;
                         },
                         onSaved: (value) {
-                          setState(() {});
                           _editedEmployee = Employee(
-                            value,
-                            _editedEmployee.dob,
+                            _editedEmployee.name,
+                            _selectedDate.millisecondsSinceEpoch,
                             _editedEmployee.designation,
                           );
                         },
                       ),
-                      Consumer<List<Designation>>(
-                          builder: (_, designations, __) {
-                        final newData = [];
-                        designations.forEach((element) {
-                          newData.add(element.toMap());
-                        });
-                        return DropDownFormField(
-                          titleText: 'Designation',
-                          hintText: 'Please choose one',
-                          value: _myActivity,
-                          onSaved: (value) {
-                            final onEdit = _myActivity;
-                            if (employeeId > 0) {
-                              _myActivity = onEdit;
-                            } else {
-                              _myActivity = value;
-                            }
-                            _editedEmployee = Employee(
-                              _editedEmployee.name,
-                              _editedEmployee.dob,
-                              _myActivity,
-                            );
-                          },
-                          validator: (value) {
-                            return (_myActivity == null)
-                                ? 'Please provide a value'
-                                : null;
-                          },
-                          onChanged: (value) {
-                            setState(() {
-                              _myActivity = value;
-                            });
-                          },
-                          dataSource: newData,
-                          textField: 'display',
-                          valueField: 'value',
-                        );
-                      }),
-                      InkWell(
-                        onTap: _presentDatePicker,
-                        child: IgnorePointer(
-                          child: TextFormField(
-                            controller: _dobController,
-                            decoration: InputDecoration(labelText: 'dob'),
-                            textInputAction: TextInputAction.done,
-                            focusNode: _dobFocusNode,
-                            onFieldSubmitted: (_) => _saveForm,
-                            validator: (value) {
-                              if (value.isEmpty) {
-                                return 'Please enter a valid Date.';
-                              }
-                              return null;
-                            },
-                            onSaved: (value) {
-                              _editedEmployee = Employee(
-                                _editedEmployee.name,
-                                _selectedDate.millisecondsSinceEpoch,
-                                _editedEmployee.designation,
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          _saveForm();
-                          Navigator.of(context)
-                              .pushReplacementNamed(HomePage.id);
-                        }, //_saveForm
-                        child: new Container(
-                          margin: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
-                          child: getAppBorderButton(
-                              (employeeId > 0) ? "Edit" : "Add",
-                              EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0)),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                  GestureDetector(
+                    onTap: () {
+                      _saveForm();
+                      Navigator.of(context).pop(employeeId);
+                    }, //_saveForm
+                    child: new Container(
+                      margin: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
+                      child: getAppBorderButton(
+                          (employeeId > 0) ? "Edit" : "Add",
+                          EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0)),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   Widget getAppBorderButton(String buttonLabel, EdgeInsets margin) {
@@ -234,17 +232,19 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
   }
 
   Future<void> addRecord() async {
-    var db = EmployeeProvider();
+//    var db = EmployeeProvider();
     if (employeeId > 0) {
-      _editedEmployee.setUserId(employeeId);
-      await db.update(_editedEmployee);
+      _editedEmployee.setEmployeeId(employeeId);
+      await Provider.of<EmployeeProvider>(context, listen: false)
+          .update(_editedEmployee);
     } else {
-      await db.saveEmployee(_editedEmployee);
+      await Provider.of<EmployeeProvider>(context, listen: false)
+          .saveEmployee(_editedEmployee);
     }
   }
 
-  Future<Employee> getEmployee(int id) async {
-    var db = EmployeeProvider();
-    return await db.getSingleEmployee(id);
-  }
+//  Future<Employee> getEmployee(int id) async {
+//    var db = EmployeeProvider();
+//    return await db.getSingleEmployee(id);
+//  }
 }

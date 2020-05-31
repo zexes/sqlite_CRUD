@@ -1,4 +1,6 @@
-class Designation {
+import 'package:flutter/cupertino.dart';
+
+class Designation with ChangeNotifier {
   int id;
   String _display; // since i did not declare as final
   String _value;
@@ -23,7 +25,7 @@ class Designation {
 //    map["designation"] = _designation;
 //    return map;}
 
-  void setUserId(int id) {
+  void setDesignationId(int id) {
     this.id = id;
   }
 }

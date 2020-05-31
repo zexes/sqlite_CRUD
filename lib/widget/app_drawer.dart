@@ -62,11 +62,35 @@ class AppDrawer extends StatelessWidget {
             ),
             title: Text('Logout', style: txtStyle),
             onTap: () {
-              HomePage().onWillPop(context);
+              logout(context);
             },
           ),
         ],
       ),
     );
+  }
+
+  Future<bool> logout(BuildContext context) {
+    return showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: new Text('Are you sure?'),
+            content: new Text('Do you want to exit an App'),
+            actions: <Widget>[
+              new FlatButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: new Text('No'),
+              ),
+              new FlatButton(
+//                onPressed: () => Navigator.of(context).pop(true),
+//                onPressed: () => SystemNavigator.pop(),
+                onPressed: () =>
+                    SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
+                child: new Text('Yes'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 }

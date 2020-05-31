@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:sqlite/model/Designation.dart';
 import 'package:sqlite/provider/designation_provider.dart';
-import 'package:sqlite/screens/designation_screen.dart';
 
 class EditDesignationScreen extends StatefulWidget {
   final int chosenDesignationId;
@@ -28,7 +28,9 @@ class _EditDesignationScreenState extends State<EditDesignationScreen> {
     if (_isInit) {
       if (widget.chosenDesignationId != null) {
         designationId = widget.chosenDesignationId;
-        _editedDesignation = await getDesignation(designationId);
+        _editedDesignation =
+            await Provider.of<DesignationProvider>(context, listen: false)
+                .getSingleDesignation(designationId);
         _designationController.text = _editedDesignation.display;
       }
     }
@@ -47,10 +49,8 @@ class _EditDesignationScreenState extends State<EditDesignationScreen> {
     if (!isValid) {
       return;
     }
-    _form.currentState
-        .save(); //updated _editedProduct above when save is called in the fields below
+    _form.currentState.save();
     addRecord();
-    Navigator.of(context).pushReplacementNamed(DesignationScreen.id);
   }
 
   @override
@@ -79,7 +79,11 @@ class _EditDesignationScreenState extends State<EditDesignationScreen> {
                     },
                   ),
                   GestureDetector(
-                    onTap: () => _saveForm(), //_saveForm
+                    onTap: () {
+                      _saveForm();
+                      print(' now i got u $designationId');
+                      Navigator.of(context).pop(designationId);
+                    }, //_saveForm
                     child: new Container(
                       margin: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
                       child: getAppBorderButton(
@@ -118,17 +122,22 @@ class _EditDesignationScreenState extends State<EditDesignationScreen> {
   }
 
   Future<void> addRecord() async {
-    var db = DesignationProvider();
+//    var db = DesignationProvider();
     if (designationId > 0) {
-      _editedDesignation.setUserId(designationId);
-      await db.update(_editedDesignation);
+      _editedDesignation.setDesignationId(designationId);
+      await Provider.of<DesignationProvider>(context, listen: false)
+          .update(_editedDesignation);
     } else {
-      await db.saveDesignation(_editedDesignation);
+      int index = Provider.of<DesignationProvider>(context, listen: false)
+          .designations
+          .indexWhere(
+              (element) => element.value == _designationController.text);
+      if (index < 0) {
+        await Provider.of<DesignationProvider>(context, listen: false)
+            .saveDesignation(_editedDesignation);
+      } else {
+        designationId = -9;
+      }
     }
-  }
-
-  Future<Designation> getDesignation(int id) async {
-    var db = DesignationProvider();
-    return await db.getSingleDesignation(id);
   }
 }

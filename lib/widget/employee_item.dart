@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../model/employee.dart';
+import 'package:provider/provider.dart';
 import '../provider/employee_provider.dart';
 import '../screens/add_edit_employeeScreen.dart';
-import '../screens/home_page.dart';
 
 class EmployeeItem extends StatelessWidget {
   final int id;
@@ -22,19 +21,16 @@ class EmployeeItem extends StatelessWidget {
     return shortName;
   }
 
-  Future<void> deleteEmployee() async {
-    var db = EmployeeProvider();
-    Employee employee = await db.getSingleEmployee(id);
-    await db.deleteEmployee(employee);
-  }
-
-  Future<void> editEmployee(Employee employee) async {
-    var db = EmployeeProvider();
-    db.update(employee);
+  Future<void> deleteEmployee(BuildContext context) async {
+    final employeeProvider =
+        Provider.of<EmployeeProvider>(context, listen: false);
+    await employeeProvider.deleteEmployee(id);
   }
 
   @override
   Widget build(BuildContext context) {
+    ScaffoldState scaffold = Scaffold.of(context);
+//    Provider.of<EmployeeProvider>(context, listen: false).getEmployees();
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 15.0, vertical: 4.0),
       elevation: 5.0,
@@ -73,20 +69,45 @@ class EmployeeItem extends StatelessWidget {
               children: <Widget>[
                 IconButton(
                   icon: Icon(Icons.edit),
-                  onPressed: () {
-                    showDialog(
+                  onPressed: () async {
+                    print('in employee item: $id');
+                    int result = await showDialog(
                       context: context,
                       builder: (BuildContext ctx) => EditEmployeeScreen(
                         chosenEmployeeId: id,
                       ),
                     );
+                    if (result != null && result > 0) {
+                      scaffold.hideCurrentSnackBar();
+                      scaffold.showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Modified an Employee Profile',
+                            textAlign: TextAlign.center,
+                          ),
+                          backgroundColor: Theme.of(context).accentColor,
+                        ),
+                      );
+                    }
                   },
                   color: Theme.of(context).accentColor,
                 ),
                 IconButton(
                   icon: Icon(Icons.delete),
-                  onPressed: () {
-                    return _showDialog(context);
+                  onPressed: () async {
+                    bool result = await _showDialog(context);
+                    if (result) {
+                      scaffold.hideCurrentSnackBar();
+                      scaffold.showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Deleted an Employee',
+                            textAlign: TextAlign.center,
+                          ),
+                          backgroundColor: Theme.of(context).accentColor,
+                        ),
+                      );
+                    }
                   },
                   color: Theme.of(context).errorColor,
                 )
@@ -114,8 +135,9 @@ class EmployeeItem extends StatelessWidget {
           FlatButton(
             child: Text('Yes'),
             onPressed: () async {
-              await deleteEmployee();
-              Navigator.of(context).pushReplacementNamed(HomePage.id);
+              await deleteEmployee(context);
+//              Navigator.of(context).pushReplacementNamed(HomePage.id);
+              Navigator.of(context).pop(true);
             },
           )
         ],

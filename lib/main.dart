@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sqlite/provider/designation_provider.dart';
+import 'package:sqlite/screens/add_edit_designationScreen.dart';
 import './provider/employee_provider.dart';
 import './widget/app_drawer.dart';
 import './screens/designation_screen.dart';
@@ -11,8 +13,13 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<EmployeeProvider>(
-      create: (context) => EmployeeProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<EmployeeProvider>(
+            create: (context) => EmployeeProvider()),
+        ChangeNotifierProvider<DesignationProvider>(
+            create: (context) => DesignationProvider()),
+      ],
       child: MaterialApp(
         title: 'MyShop',
         theme: ThemeData(
@@ -25,7 +32,7 @@ class MyApp extends StatelessWidget {
           HomePage.id: (_) => HomePage(),
           EditEmployeeScreen.id: (_) => EditEmployeeScreen(),
           DesignationScreen.id: (_) => DesignationScreen(),
-          AppDrawer.id: (_) => AppDrawer()
+          EditDesignationScreen.id: (_) => EditDesignationScreen(),
         },
       ),
     );
