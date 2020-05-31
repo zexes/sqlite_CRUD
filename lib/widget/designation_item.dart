@@ -19,6 +19,7 @@ class DesignationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ScaffoldState scaffold = Scaffold.of(context);
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 15.0, vertical: 4.0),
       elevation: 5.0,
@@ -69,8 +70,20 @@ class DesignationItem extends StatelessWidget {
                 ),
                 IconButton(
                   icon: Icon(Icons.delete),
-                  onPressed: () {
-                    return _showDialog(context);
+                  onPressed: () async {
+                    bool result = await _showDialog(context);
+                    if (result) {
+                      scaffold.hideCurrentSnackBar();
+                      scaffold.showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Deleted a Designation!!',
+                            textAlign: TextAlign.center,
+                          ),
+                          backgroundColor: Theme.of(context).accentColor,
+                        ),
+                      );
+                    }
                   },
                   color: Theme.of(context).errorColor,
                 )
@@ -99,7 +112,7 @@ class DesignationItem extends StatelessWidget {
             child: Text('Yes'),
             onPressed: () async {
               await deleteDesignation(context);
-              Navigator.of(context).pushReplacementNamed(DesignationScreen.id);
+              Navigator.of(context).pop(true);
             },
           )
         ],

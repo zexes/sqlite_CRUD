@@ -106,5 +106,7 @@ class _DesignationScreenState extends State<DesignationScreen> {
         backgroundColor: Theme.of(context).primaryColorDark,
       ));
     }
+    await Provider.of<DesignationProvider>(context, listen: false)
+        .getDesignations();
   }
 }
