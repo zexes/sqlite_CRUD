@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:sqlite/model/Designation.dart';
-import 'package:sqlite/provider/designation_provider.dart';
+import '../model/Designation.dart';
+import '../provider/designation_provider.dart';
 
 class EditDesignationScreen extends StatefulWidget {
   final int chosenDesignationId;
@@ -81,7 +81,6 @@ class _EditDesignationScreenState extends State<EditDesignationScreen> {
                   GestureDetector(
                     onTap: () {
                       _saveForm();
-                      print(' now i got u $designationId');
                       Navigator.of(context).pop(designationId);
                     }, //_saveForm
                     child: new Container(

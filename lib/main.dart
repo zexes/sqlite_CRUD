@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sqlite/provider/designation_provider.dart';
-import 'package:sqlite/screens/add_edit_designationScreen.dart';
+import './provider/designation_provider.dart';
 import './provider/employee_provider.dart';
-import './widget/app_drawer.dart';
+import './screens/home_page.dart';
 import './screens/designation_screen.dart';
 import './screens/add_edit_employeeScreen.dart';
-import './screens/home_page.dart';
+import './screens/add_edit_designationScreen.dart';
 
 void main() => runApp(MyApp());
 

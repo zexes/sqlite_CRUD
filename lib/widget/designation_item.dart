@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sqlite/provider/employee_provider.dart';
+import '../provider/employee_provider.dart';
 import '../provider/designation_provider.dart';
 import '../screens/add_edit_designationScreen.dart';
 

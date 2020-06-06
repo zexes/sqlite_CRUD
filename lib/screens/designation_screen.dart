@@ -11,7 +11,7 @@ class DesignationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //  method called to ensure designation list used below is populated, set listen to false else there is constant rebuild,
+    //no scaffold above
     return WillPopScope(
       child: Scaffold(
         key: _scaffoldKey,
@@ -72,25 +72,24 @@ class DesignationScreen extends StatelessWidget {
         builder: (BuildContext ctx) => EditDesignationScreen());
     if (result == null) return;
     if (result == -9) {
-      _scaffoldKey.currentState.hideCurrentSnackBar();
-      _scaffoldKey.currentState.showSnackBar(SnackBar(
-        content: Text(
-          'Designation Already Exist',
-          textAlign: TextAlign.center,
-        ),
-        backgroundColor: Theme.of(context).errorColor,
-      ));
+      addSnack(context, 'Designation Already Exist',
+          Theme.of(context).errorColor.withOpacity(0.8));
     } else {
-      _scaffoldKey.currentState.hideCurrentSnackBar();
-      _scaffoldKey.currentState.showSnackBar(SnackBar(
-        content: Text(
-          'Added new Designation',
-          textAlign: TextAlign.center,
-        ),
-        backgroundColor: Theme.of(context).primaryColorDark,
-      ));
+      addSnack(
+          context, 'Added new Designation', Theme.of(context).primaryColorDark);
     }
     await Provider.of<DesignationProvider>(context, listen: false)
         .getDesignations();
+  }
+
+  void addSnack(BuildContext context, String message, Color color) {
+    _scaffoldKey.currentState.hideCurrentSnackBar();
+    _scaffoldKey.currentState.showSnackBar(SnackBar(
+      content: Text(
+        message,
+        textAlign: TextAlign.center,
+      ),
+      backgroundColor: color,
+    ));
   }
 }

@@ -2,7 +2,6 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqlite_api.dart';
-import 'package:sqlite/model/custom_exception.dart';
 import '../model/Designation.dart';
 import '../db/database_helper.dart';
 
@@ -18,12 +17,6 @@ class DesignationProvider with ChangeNotifier {
 
   Future<void> saveDesignation(Designation designation) async {
     Database db = await database;
-//    int index = _designationList
-//        .indexWhere((element) => element.value == designation.value);
-//    print('caught you $index');
-//    if (index > 0) {
-//      throw CustomException('Designation Already Exist');
-//    }
     int res = await db.insert("Designation", designation.toMap());
     _designationList.add(designation);
     print('saved new designation');
