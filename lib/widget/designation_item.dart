@@ -72,33 +72,10 @@ class DesignationItem extends StatelessWidget {
                   icon: Icon(Icons.delete),
                   onPressed: () async {
                     final result = await _showDialog(context);
-                    if (result is String && result == 'exists') {
-                      scaffold.hideCurrentSnackBar();
-                      scaffold.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Designation in Use',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Colors.black87,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          backgroundColor:
-                              Theme.of(context).errorColor.withOpacity(0.8),
-                        ),
-                      );
-                    } else if (result is bool && result) {
-                      scaffold.hideCurrentSnackBar();
-                      scaffold.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Deleted a Designation!!',
-                            textAlign: TextAlign.center,
-                          ),
-                          backgroundColor: Theme.of(context).accentColor,
-                        ),
-                      );
-                    }
+                    if (result is String && result == 'exists')
+                      snackBar(context, scaffold, 'Designation in Use');
+                    else if (result is bool && result)
+                      snackBar(context, scaffold, 'Deleted a Designation!!');
                   },
                   color: Theme.of(context).errorColor,
                 )
@@ -111,29 +88,49 @@ class DesignationItem extends StatelessWidget {
   }
 
   Future<dynamic> _showDialog(BuildContext context) {
+    print('am here');
     final employee = Provider.of<EmployeeProvider>(context, listen: false)
         .checkEmployeeDesignation(display);
-    if (employee != null) return Future(() => 'exists');
-    return showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Are you sure'),
-        content: Text('Do you want to delete Designation?'),
-        actions: <Widget>[
-          FlatButton(
-            child: Text('No'),
-            onPressed: () {
-              Navigator.of(_).pop(false);
-            },
-          ),
-          FlatButton(
-            child: Text('Yes'),
-            onPressed: () async {
-              await deleteDesignation(context);
-              Navigator.of(context).pop(true);
-            },
-          )
-        ],
+    if (employee != -1)
+      return Future(() => 'exists');
+    else
+      return showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text('Are you sure'),
+          content: Text('Do you want to delete Designation?'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(_).pop(false);
+              },
+            ),
+            FlatButton(
+              child: Text('Yes'),
+              onPressed: () async {
+                await deleteDesignation(context);
+                Navigator.of(context).pop(true);
+              },
+            )
+          ],
+        ),
+      );
+  }
+
+  void snackBar(BuildContext context, ScaffoldState scaffold, String message) {
+    scaffold.hideCurrentSnackBar();
+    scaffold.showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              color: Colors.black87,
+              fontWeight: FontWeight.bold,
+              fontSize: 18.0),
+        ),
+        backgroundColor: Theme.of(context).errorColor.withOpacity(0.8),
       ),
     );
   }

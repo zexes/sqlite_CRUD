@@ -43,10 +43,8 @@ class EmployeeProvider with ChangeNotifier {
     return employee;
   }
 
-  Employee checkEmployeeDesignation(String display) {
-    Employee employee =
-        _employeesList.firstWhere((emp) => emp.designation == display);
-    return employee != null ? employee : null;
+  int checkEmployeeDesignation(String display) {
+    return _employeesList.indexWhere((emp) => emp.designation == display);
   }
 
   Future<void> deleteEmployee(int id) async {
