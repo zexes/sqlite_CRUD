@@ -5,35 +5,9 @@ import '../screens/add_edit_designationScreen.dart';
 import '../widget/designation_item.dart';
 import '../widget/app_drawer.dart';
 
-class DesignationScreen extends StatefulWidget {
+class DesignationScreen extends StatelessWidget {
   static const String id = 'designation_screen';
-
-  @override
-  _DesignationScreenState createState() => _DesignationScreenState();
-}
-
-class _DesignationScreenState extends State<DesignationScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  bool _isInit = true;
-  bool _isLoading = false;
-
-  @override
-  void didChangeDependencies() {
-    if (_isInit) {
-      setState(() {
-        _isLoading = true;
-      });
-//      method called to ensure designation list used below is populated
-      Provider.of<DesignationProvider>(context).getDesignations().then((value) {
-        setState(() {
-          _isLoading = false;
-        });
-      });
-    }
-    _isInit = false;
-    super.didChangeDependencies();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,23 +24,33 @@ class _DesignationScreenState extends State<DesignationScreen> {
             )
           ],
         ),
-        body: _isLoading
-            ? CircularProgressIndicator()
-            : Consumer<DesignationProvider>(
-                builder: (_, designationData, __) {
-                  final designationList = designationData.designations;
-                  return ListView.builder(
-                    itemBuilder: (context, index) =>
-                        ChangeNotifierProvider.value(
-                            value: designationList[index],
-                            child: DesignationItem(
-                                id: designationList[index].id,
-                                display: designationList[index].display,
-                                value: designationList[index].value)),
-                    itemCount: designationList.length,
-                  );
-                },
-              ),
+        body: FutureBuilder(
+            future: Provider.of<DesignationProvider>(context, listen: false)
+                .getDesignations(),
+            builder: (ctx, dataSnapshot) {
+              if (dataSnapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (dataSnapshot.error != null) {
+                // handle error
+                return Center(child: Text('An error occurred'));
+              } else {
+                return Consumer<DesignationProvider>(
+                  builder: (_, designationData, __) {
+                    final designationList = designationData.designations;
+                    return ListView.builder(
+                      itemBuilder: (context, index) =>
+                          ChangeNotifierProvider.value(
+                              value: designationList[index],
+                              child: DesignationItem(
+                                  id: designationList[index].id,
+                                  display: designationList[index].display,
+                                  value: designationList[index].value)),
+                      itemCount: designationList.length,
+                    );
+                  },
+                );
+              }
+            }),
         drawer: AppDrawer(),
         floatingActionButton: FloatingActionButton(
           elevation: 5.0,

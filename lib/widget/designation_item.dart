@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sqlite/provider/employee_provider.dart';
 import '../provider/designation_provider.dart';
 import '../screens/add_edit_designationScreen.dart';
-import '../screens/designation_screen.dart';
 
 class DesignationItem extends StatelessWidget {
   final int id;
@@ -71,8 +71,23 @@ class DesignationItem extends StatelessWidget {
                 IconButton(
                   icon: Icon(Icons.delete),
                   onPressed: () async {
-                    bool result = await _showDialog(context);
-                    if (result) {
+                    final result = await _showDialog(context);
+                    if (result is String && result == 'exists') {
+                      scaffold.hideCurrentSnackBar();
+                      scaffold.showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Designation in Use',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Colors.black87,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          backgroundColor:
+                              Theme.of(context).errorColor.withOpacity(0.8),
+                        ),
+                      );
+                    } else if (result is bool && result) {
                       scaffold.hideCurrentSnackBar();
                       scaffold.showSnackBar(
                         SnackBar(
@@ -95,7 +110,10 @@ class DesignationItem extends StatelessWidget {
     );
   }
 
-  Future _showDialog(BuildContext context) {
+  Future<dynamic> _showDialog(BuildContext context) {
+    final employee = Provider.of<EmployeeProvider>(context, listen: false)
+        .checkEmployeeDesignation(display);
+    if (employee != null) return Future(() => 'exists');
     return showDialog(
       context: context,
       builder: (_) => AlertDialog(

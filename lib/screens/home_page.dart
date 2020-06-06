@@ -10,35 +10,10 @@ import './add_edit_employeeScreen.dart';
 
 enum Options { Add, Designation }
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   static const String id = 'home_page';
 
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool _isInit = true;
-  bool _isLoading = false;
-
-  @override
-  void didChangeDependencies() {
-    if (_isInit) {
-      setState(() {
-        _isLoading = true;
-      });
-      Provider.of<DesignationProvider>(context).getDesignations();
-//      method called to ensure employee list used below is populated
-      Provider.of<EmployeeProvider>(context).getEmployees().then((value) {
-        setState(() {
-          _isLoading = false;
-        });
-      });
-    }
-    _isInit = false;
-    super.didChangeDependencies();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,9 +46,18 @@ class _HomePageState extends State<HomePage> {
             )
           ],
         ),
-        body: _isLoading
-            ? Center(child: CircularProgressIndicator())
-            : Consumer<EmployeeProvider>(
+        body: FutureBuilder(
+          future: Provider.of<EmployeeProvider>(context, listen: false)
+              .getEmployees(),
+          builder: (ctx, dataSnapshot) {
+            if (dataSnapshot.connectionState == ConnectionState.waiting)
+              return Center(child: CircularProgressIndicator());
+            else if (dataSnapshot.error != null)
+              return Center(
+                child: Text('An error Occurred'),
+              );
+            else
+              return Consumer<EmployeeProvider>(
                 builder: (_, employeeData, __) {
                   final employeeList = employeeData.employees;
                   return ListView.builder(
@@ -88,7 +72,9 @@ class _HomePageState extends State<HomePage> {
                     itemCount: employeeList.length,
                   );
                 },
-              ),
+              );
+          },
+        ),
         drawer: AppDrawer(),
         floatingActionButton: FloatingActionButton(
           elevation: 5.0,
@@ -103,6 +89,23 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showDialog(BuildContext context) async {
+    final totalDesignations =
+        Provider.of<DesignationProvider>(context, listen: false).designations;
+    if (totalDesignations.length <= 0) {
+      _scaffoldKey.currentState.hideCurrentSnackBar();
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          content: Text(
+            'Add designations to Proceed',
+            textAlign: TextAlign.center,
+          ),
+          backgroundColor: Theme.of(context).errorColor,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
     int result = await showDialog(
         context: context,
         builder: (BuildContext context) => EditEmployeeScreen());
@@ -115,6 +118,7 @@ class _HomePageState extends State<HomePage> {
             textAlign: TextAlign.center,
           ),
           backgroundColor: Theme.of(context).accentColor,
+          duration: Duration(seconds: 2),
         ),
       );
     }
